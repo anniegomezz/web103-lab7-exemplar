@@ -8,6 +8,23 @@ const currentPath = fileURLToPath(import.meta.url)
 const tripsFile = fs.readFileSync(path.join(dirname(currentPath), '../config/data/data.json'))
 const tripsData = JSON.parse(tripsFile)
 
+const dropAllTables = async () => {
+  const dropTablesQuery = `
+      DROP TABLE IF EXISTS trips_users;
+      DROP TABLE IF EXISTS trips_destinations;
+      DROP TABLE IF EXISTS activities;
+      DROP TABLE IF EXISTS users;
+      DROP TABLE IF EXISTS destinations;
+      DROP TABLE IF EXISTS trips;
+  `;
+  try {
+    await pool.query(dropTablesQuery);
+    console.log("🧹 all tables dropped successfully");
+  } catch (err) {
+    console.error("⚠️ error dropping tables", err);
+  }
+};
+
 const createActivitiesTable = async () => {
     const createActivitiesTableQuery = `
         CREATE TABLE IF NOT EXISTS activities (
@@ -175,6 +192,17 @@ const seedTripsTable = async () => {
         })
     })
 }
+
+const resetDatabase = async () => {
+  await dropAllTables();
+  await seedTripsTable();
+  await createDestinationsTable();
+  await createActivitiesTable();
+  await createTripsDestinationsTable();
+  await createUsersTable();
+  await createTripsUsersTable();
+};
+resetDatabase();
 
 seedTripsTable()
 createActivitiesTable()
